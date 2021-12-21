@@ -49,33 +49,29 @@ async function getBalances(accountName) {
 
                 // Get contract location for testnet/mainnet
                 const contractID = (testnet ? tokenList[token].contractIdTest : tokenList[token].contractIdMain);
+                const chainNr = "chain" + chain;
+                const command = getBalanceCommand(contractID, accountName, chain)
 
-                // Pact command to send to blockchain
-                const code = "(" + contractID +".get-balance \"" + accountName + "\")";
-            
-                // Fetch command
-                const fetchcommand = {
-                    pactCode: code,
-                    meta: Pact.lang.mkMeta("OTK", chain.toString(), 0.0001, 400, 0, 28800)
-                };
                 try {
-                    // Using PACT api for simplicity
-                    const tx = await Pact.fetch.local(fetchcommand, host(chain))
-                    const chainNr = "chain" + chain;
-                    if (tx['result'].status == "success") {
-                        
-                        tokenBalance[tokenList[token].coinName][chainNr] = tx['result'].data;
-                        
-                    } else {
-                        tokenBalance[tokenList[token].coinName][chainNr] = 0.0;
+                    const tx = await fetch(host(chain, "local"), {
+                        headers: {"Content-Type" : "application/json"},
+                        body: JSON.stringify(command),
+                        method: "POST"
+                    })
+                    if (tx.ok) {
+                        const data = await tx.json();
+                        if (data.result.status == "success") {
+                            tokenBalance[tokenList[token].coinName][chainNr] = data.result.data;
+                        } else if (data.result.error.message.includes("row not found")) {
+                            tokenBalance[tokenList[token].coinName][chainNr] = 0.0;
+                        }
                     }
                 } catch (error) {
-                    console.log("Error in fetching balance: " + error);
+                    console.log(error)
                 }
-
         }
     }
-    console.log(tokenBalance)
+    // Returns balance for each chain on each token ({token : chain : balance})
     return tokenBalance;
 }
 
@@ -102,5 +98,23 @@ function createCommandCW(command, accountName, chain) {
                     networkId: ""
                 }
                 return signingCmd;
+}
+
+function getBalanceCommand(token, accountName, chain) {
+
+    // Pact command to send to blockchain
+    const code = "(" + token +".get-balance \"" + accountName + "\")";
+
+    // Fetch command
+    const fetchcommand = {
+        pactCode: code,
+        meta: Pact.lang.mkMeta("OTK", chain.toString(), 0.0001, 400, 0, 28800)
+    };
+
+    // Let Pact API sign the transaction
+    const {keyPairs, nonce, pactCode, envData, meta, networkId} = fetchcommand
+    const sigs = Pact.api.prepareExecCmd(keyPairs, nonce, pactCode, envData, meta, networkId)
+
+    return sigs;
 }
 
