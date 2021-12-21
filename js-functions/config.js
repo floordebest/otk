@@ -2,6 +2,16 @@
 
 var testnet = true // Set to false to move to production
 
+var existingTestKeyPair = {
+    publicKey: "dc991904cd0d2d40b3b67f40429826daebd4dd9fa68388a8e304b0cb46200cb9",
+    secretKey: "6d370b3f65eb850a6001cecb6efcb2dbdafa90bff192b71862e875295692a6d1"
+}
+
+var nonExistingTestKeyPair = {
+    publicKey: "24028c9060a09e77c1557ab0dd8923d1bd2f7d0e977874749e3bb732e5f6cc9d",
+    secretKey: "3a07aff392ff8e2bf649fa34d5d9508a479da873a065ef7a76e937ea83d77783"
+}
+
 var numberOfChains = 20; // Number of active chains on the blockchain
 
 var creationTime = () => Math.round(new Date().getTime() / 1000) - 15; // Creates a timestamp

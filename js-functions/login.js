@@ -1,8 +1,13 @@
 
 async function confirmOwnership() {
         const accountName = document.getElementById("accountName").value;
-        
-            // First sign 1 command with Chainweaver to check if user is the owner of the account
+        const privKey = document.getElementById("privateKey").value;
+
+        if (privKey) {
+            // If private key is entered, go to private key login
+            loginWithSecretKey(accountName, privKey);
+        } else {
+           // First sign 1 command with Chainweaver to check if user is the owner of the account
 
             // Create object to sign in chainweaver, this object runs the blockchain function 'check-ownership' from the 'otk-test-module' module
             const signingCmd = createCommandCW("free.otk-test-module.check-ownership", accountName, 0)
@@ -35,8 +40,35 @@ async function confirmOwnership() {
             } catch (error) {
                 console.log("Error found: " + error)
             }
+        }
 }
+async function loginWithSecretKey(accountName, privKey) {
+    // Try to get the public key from the private key
+    try {
+        const keyPair = Pact.crypto.restoreKeyPairFromSecretKey(privKey);
+        const command = "(free.otk-test-module.check-ownership \"" + accountName + "\")"
 
+        const sig = signWithPact(keyPair, command, 0);
+
+        const tx = await fetch(host(0, "local"), {
+            headers: {"Content-Type" : "application/json"},
+            body: JSON.stringify(sig),
+            method: "POST"
+        })
+        if (tx.ok) {
+            const data = await tx.json();
+            if (data.result.data) {
+                console.log(data.result.data);
+                getBalances(accountName)
+            } else if (data.result.error.message.includes("row not found")){
+                console.log("Error: Account does not exist on the Kadena Blockchain, make sure your account is active on chain 0")
+            }
+        }
+
+    } catch (error) {
+        console.log("Error: " + error)
+    }
+}
 async function getBalances(accountName) {
 
     const tokenBalance = {}
@@ -72,6 +104,7 @@ async function getBalances(accountName) {
         }
     }
     // Returns balance for each chain on each token ({token : chain : balance})
+    console.log(tokenBalance);
     return tokenBalance;
 }
 
@@ -109,6 +142,22 @@ function getBalanceCommand(token, accountName, chain) {
     const fetchcommand = {
         pactCode: code,
         meta: Pact.lang.mkMeta("OTK", chain.toString(), 0.0001, 400, 0, 28800)
+    };
+
+    // Let Pact API sign the transaction
+    const {keyPairs, nonce, pactCode, envData, meta, networkId} = fetchcommand
+    const sigs = Pact.api.prepareExecCmd(keyPairs, nonce, pactCode, envData, meta, networkId)
+
+    return sigs;
+}
+
+function signWithPact(keyPair, command, chain) {
+
+    // Fetch command
+    const fetchcommand = {
+        pactCode: command,
+        meta: Pact.lang.mkMeta("OTK", chain.toString(), 0.0001, 400, 0, 28800),
+        keyPairs: (keyPair ? [keyPair] : [])
     };
 
     // Let Pact API sign the transaction

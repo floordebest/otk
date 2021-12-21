@@ -12,16 +12,41 @@
     <script src="js-functions/config.js"></script>
     <script src="js-functions/login.js"></script>
 </head>
+<script>
+
+    function loginWithChainWeaver(login) {
+        if (!login) {
+            document.getElementById("enterPrivKey").style.display = "none"
+        } else {
+            document.getElementById("enterPrivKey").style.display = "contents"
+        }
+    }
+
+    //console.log(Pact.crypto.genKeyPair())
+    
+</script>
 <body>
-    <h1>Login with Chainweaver:</h1>
+    <h1>Login to Over The Kounter:</h1>
 
         <div id="div1">
+            <input type="radio" id="ChainWeaver" name="fav_language" value="CHAINWEAVER" checked onclick="loginWithChainWeaver(false)"/>
+            <label for="html">Login with ChainWeaver</label><br><br>
+            <input type="radio" id="PrivateKey" name="fav_language" value="PRIVATEKEY" onclick="loginWithChainWeaver(true)"/>
+            <label for="css">Login with Private Key</label><br><br>                        
         </div>
         <form id="loginForm">
-        <label>Enter your accountname:</label><br>    
-        <input id="accountName"/>
-        <button onclick="confirmOwnership()" type="button">Login</button><br>
+            <div id="enterAccount">
+                <label>Enter your accountname:</label><br>    
+                <input id="accountName"/>
+                <br>
+            </div>
+            <div id="enterPrivKey">
+                <label>Enter your privateKey:</label><br>  
+                <input id="privateKey"/>
+            </div>
+            <button onclick="confirmOwnership()" type="button">Login</button><br>
         </form>
+        <script>document.getElementById("enterPrivKey").style.display = "none";</script>
 </body>
 
 </html>
