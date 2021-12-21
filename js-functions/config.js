@@ -4,6 +4,8 @@ var testnet = true // Set to false to move to production
 
 var numberOfChains = 20; // Number of active chains on the blockchain
 
+var creationTime = () => Math.round(new Date().getTime() / 1000) - 15; // Creates a timestamp
+
 // List of all tokens on the blockchain and contract names
 var tokenList = [
     {
@@ -47,7 +49,7 @@ function host(chainID, command) {
         apiCommand = "/spv";
         break;
       default:
-        apiCommand = "/api/v1/local";
+        apiCommand = "";
     }
 
     if (!testnet) {
