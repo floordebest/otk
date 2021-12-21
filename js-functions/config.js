@@ -1,5 +1,7 @@
 // Constants for communication with Kadena Blockchain
 
+var testnet = true // Set to false to move to production
+
 var numberOfChains = 20; // Number of active chains on the blockchain
 
 // List of all tokens on the blockchain and contract names
@@ -25,8 +27,8 @@ var tokenList = [
   ];
 
 // Returns an URL of the blockchain for testnet or mainnet
-function host(testnet, chainID, command) {
-    const apiCommand = "";
+function host(chainID, command) {
+    var apiCommand = "";
 
     switch (command) {
       case "send": //write to Blockchain
