@@ -12,6 +12,19 @@
         (enforce-guard (keyset-ref-guard 'otk-keyset))
     )
 
+    (defcap ALLOW_ENTRY (account:string)
+        ; User can only access data if owner of account and there is a minimum amount in account
+        (with-read coin-table account
+            { "guard"   := actual-guard
+            , "balance" := balance }
+
+            (enforce-guard actual-guard)
+            (enforce (>= balance MIN_AMOUNT)) ;; Check if balance is greater as 1
+        )
+    )
+
+    (defconst MIN_AMOUNT 1 "Minimal amount an account should have to enter")
+
     (defschema otk_ad-schema
   
 
@@ -28,7 +41,7 @@
         created_at:integer  ;date is millis since 1-1-1970
         )
       
-    (deftable otk_ad-table:{adds-schema})
+    (deftable otk_ad-table:{otk_ad-schema})
 
     (defschema otk_bid-schema
   
@@ -44,7 +57,7 @@
         created_at:integer  ;date is millis since 1-1-1970
         )
       
-    (deftable otk_bid-table:{adds-schema})
+    (deftable otk_bid-table:{otk_bid-schema})
 
     (defschema otk_tx-schema
   
@@ -59,13 +72,7 @@
       
     (deftable otk_tx-table:{adds-schema})
 
-    (defun check-ownership:bool (account:string)
-        (with-read coin-table account
-            { "guard" := actual-guard }
 
-            (enforce-guard actual-guard)
-        )
-    )
 
     (defun new-ad:string (
         account:string
@@ -77,7 +84,12 @@
         created_address:string
         date:integer)
 
-        ;; Run function check-ownership?
+        (with-capability (ALLOW_ENTRY account)
+            (insert otk_ad ad_id{
+                "token_offered"     : token_offered
+            })
+        
+        )
 
             ;; Write function to:
             ;;  - add to ad-table
@@ -94,8 +106,11 @@
         created_address:string
         date:integer)
 
-        ;; Run function check-ownership?
-
+        (with-capability (ALLOW_ENTRY account)
+            (insert otk_ad ad_id{
+                "token_offered"     : token_offered
+            })
+        )
             ;; Write function to:
             ;;  - add to bid-table
             ;;  - transfer amount from 'account' to bid-address
@@ -138,5 +153,6 @@
         ;;  - transfer amounts to bidder and to seller
         ;;  - update status of the bid to accepted
         ;;  - update status to temporary finished, come back later to check if all transactions finished
+        )
     )
 )
