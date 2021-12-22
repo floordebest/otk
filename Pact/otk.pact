@@ -5,7 +5,7 @@
 
 (module otk-test-module GOVERNANCE
 
-    (use coin)
+    (use coin) ;; Use the coin contract for transfer function for kda coin
 
     (defcap GOVERNANCE ()
         ; Module can only be upgraded with admin keyset
@@ -15,64 +15,75 @@
     (defcap ALLOW_ENTRY (account:string)
         ; User can only access data if owner of account and there is a minimum amount in account
         (with-read coin-table account
-            { "guard"   := actual-guard
-            , "balance" := balance }
+            { 
+                "guard"   := actual-guard,
+                "balance" := balance 
+            }
 
             (enforce-guard actual-guard)
             (enforce (>= balance MIN_AMOUNT)) ;; Check if balance is greater as 1
         )
     )
 
-    (defconst MIN_AMOUNT 1 "Minimal amount an account should have to enter")
+    (defcap ALLOW_AD_EDIT (ad_id:integer)
+        ; User can only edit Ad if they are have the right keyset (guard) and ad is active
+        (with-read otk_ad-table ad_id 
+            { 
+                "owner"     := actual-guard,
+                "ad_status" := status
+            }
+            
+            (enforce-guard actual-guard)
+            (enforce (= status "active"))
+        )
+    )
+
+    (defcap ALLOW_BID_EDIT (bid_id:integer)
+        ; User can only edit Bid if they are have the right keyset (guard) and Bid is active
+        (with-read otk_bid-table ad_id 
+            { 
+                "owner"         := actual-guard,
+                "bid_status"    := status
+            }
+            
+            (enforce-guard actual-guard)
+            (enforce (= status "active"))
+    )
+)
+
+    (defconst MIN_AMOUNT:integer 1 "Minimal amount an account should have to enter")
+    (defconst AD_DEPOSITS:string 'otk-adDeposits )  ; Account name where ad deposits will be stored, owned by this module
+    (defconst BID_DEPOSITS:string 'otk-bidDeposits ); Account name where bid deposits will be stored, owned by this module
+    (defconst OTK_BANK:string 'otk-Bank )           ; Account name where transactions fees will be send, owned by keyset
 
     (defschema otk_ad-schema
-  
 
-        @doc "Create a new ad"
-      
         ad_id:integer
         token_offered:string
         amount_offered:decimal
         token_asked:string
         amount_asked:string
         ad_status:string
+        account:string
         owner:guard 
-        ad_address:string ;deposit address that keeps the token while ad not cancelled or fullfilled
         created_at:integer  ;date is millis since 1-1-1970
         )
       
     (deftable otk_ad-table:{otk_ad-schema})
 
     (defschema otk_bid-schema
-  
-        @doc "Bids table"
       
         bid_id:integer
         ad_id:integer
         bid_token:string
         bid_amount:decimal
         bid_status:string
+        account:string
         owner:guard 
-        bid_address:string ;deposit address that keeps the token while bid not cancelled or fullfilled
         created_at:integer  ;date is millis since 1-1-1970
         )
       
     (deftable otk_bid-table:{otk_bid-schema})
-
-    (defschema otk_tx-schema
-  
-        @doc "Transaction table"
-      
-        tx_id:integer
-        ad_id:integer
-        bid_id:integer
-        tx_status:string
-        created_at:integer  ;date is millis since 1-1-1970
-        )
-      
-    (deftable otk_tx-table:{adds-schema})
-
-
 
     (defun new-ad:string (
         account:string
@@ -83,19 +94,17 @@
         guard:guard
         created_address:string
         date:integer)
-
-        (with-capability (ALLOW_ENTRY account)
-            (insert otk_ad ad_id{
-                "token_offered"     : token_offered
-            })
         
+        (coin.transfer account AD_DEPOSITS amount_offered) ; Handle transaction first, on fail will break function here
+        
+        (insert otk_ad ad_id
+            {
+            "token_offered"     : token_offered
+            }
         )
 
             ;; Write function to:
             ;;  - add to ad-table
-            ;;  - transfer amount from 'account' to ad-address
-            ;;  - temporary status untill checked amount is really in address (can take between 30s up to 4min)
-        
     )
 
     (defun new-bid:string (
@@ -106,48 +115,52 @@
         created_address:string
         date:integer)
 
-        (with-capability (ALLOW_ENTRY account)
-            (insert otk_ad ad_id{
+        (coin.transfer account BID_DEPOSITS amount_offered) ; Handle transaction first, on fail will break function here
+       
+        (insert otk_ad ad_id
+            {
                 "token_offered"     : token_offered
-            })
+            }
         )
+        
             ;; Write function to:
             ;;  - add to bid-table
-            ;;  - transfer amount from 'account' to bid-address
-        
     )
 
     (defun cancell-ad:string (ad_id:integer)
-        (with-read otk_ad-table ad_id
-            { "guard" := actual-guard }
-            
-            (enforce-guard actual-guard) ;; Only owner of the ad can change status
 
-            ;; Write function to:
-            ;;  - update status
-            ;;  - withdraw amount from ad-address to owner
-            ;;  - cancell all bids en return amount to owners
+        (with-capability ALLOW_AD_EDIT ad_id
+
+            (with-read otk_ad-table ad_id
+                { 
+                    "amount_offered"  := amount,
+                    "account"         := account 
+                }
+
+                (install-capability (coin.TRANSFER AD_DEPOSITS account amount))
+                (coin.transfer AD_DEPOSITS account amount)  ; Handle transaction first, on fail will break function here
+
+                (update otk_ad-table ad_id
+                    {
+                        "status" : cancelled
+                    }    
+                )
+                
+                (map (cancell-bid) (select otk_bid-table ["bid_id"] (where 'ad_id (= ad_id))))
+            )
         )
     )
 
     (defun cancell-bid:string (bid_id:integer)
-        (with-read otk_bid-table bid_id
-            { "guard" := actual-guard }
-            
-            (enforce-guard actual-guard) ;; Only owner of the bid can change status
 
             ;; Write function to:
+            ;;  - only allow access to this function for owner (ALLOW_BID_EDIT) or from cancell-ad function
             ;;  - update status
             ;;  - withdraw amount from bid-address to owner
         )
     )
 
     (defun accept-offer:string (ad_id:integer guard:guard)
-        (with-read otk_ad-table ad_id
-            { "guard" := actual-guard }
-            
-            (enforce-guard actual-guard) ;; Only owner of the ad can accept an offer
-
         ;; Write functions to:
         ;;  - check that bid amount is really in bid_address
         ;;  - transfer amounts to bidder and to seller
