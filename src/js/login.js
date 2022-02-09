@@ -202,9 +202,9 @@ async function getOTKAds() {
                         if (data.result.data[ls].is_token_ad) {
                             tokenList.push({
                                 "chain": i,
-                                "token_offered":data.result.data[ls].token_offered,
+                                "token_offered":data.result.data[ls].token_offered.refName.name,
                                 "amount_offered": data.result.data[ls].amount_offered,
-                                "token_asked": data.result.data[ls].token_asked,
+                                "token_asked": data.result.data[ls].token_asked.refName.name,
                                 "asking_price": data.result.data[ls].amount_asked,
                                 "created_at": data.result.data[ls].created_at // ;date is (int) millis since 1-1-1970
                             });
@@ -212,7 +212,7 @@ async function getOTKAds() {
                             accountsList.push({
                                 "chain": i,
                                 "account": data.result.data[ls].account,
-                                "token_asked": data.result.data[ls].token_asked,
+                                "token_asked": data.result.data[ls].token_asked.refName.name,
                                 "asking_price": data.result.data[ls].amount_asked,
                                 "created_at": data.result.data[ls].created_at // ;date is (int) millis since 1-1-1970
                             });
@@ -228,7 +228,7 @@ async function getOTKAds() {
    // }
     if (accountsList.length > 0 || tokenList.length > 0) {
         console.log("Account Ads: " + accountsList[1].account);
-        console.log("Token Ads: " + tokenList)
+        console.log("Token Ads: " + tokenList[0].token_offered)
     }
     
 }

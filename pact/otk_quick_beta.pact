@@ -104,7 +104,7 @@
         recipient_account:string
         )
 
-        (insert otk_ad-table account_name
+        (insert otk_ad-table (tx-hash)
             {
                 "ad_id"         :   (tx-hash),
                 "is_token_ad"   :   false,
@@ -122,6 +122,40 @@
         ; Check non-k: account, k: account is not possible to rotate guard
         ; Check user is owner of account offered
         ; Rotate account guard to module guard
+        ; Insert into ad table
+        ; Insert into reserverd table
+        ; Return Succes
+
+        ; Function will fail if add_id already exist
+        (format "TX ID: {}"[(tx-hash)])
+    )
+
+    (defun sell_token:string (
+        account_name:string
+        token_offered:module{fungible-v2}
+        amount_offered:decimal
+        token_asked:module{fungible-v2}
+        amount_asked:decimal
+        recipient_account:string
+        )
+
+        (insert otk_ad-table (tx-hash)
+            {
+                "ad_id"         :   (tx-hash),
+                "is_token_ad"   :   true,
+                "account"       :   account_name,
+                "token_offered" :   token_offered,
+                "amount_offered":   amount_offered,
+                "token_asked"   :   token_asked,
+                "amount_asked"  :   amount_asked,
+                "ad_status"     :   "active",
+                "recipient"     :   recipient_account,
+                "created_at"    :   12345678
+            }
+        )
+        
+        ; Check user is owner of token + amount offered
+        ; Transfer token+amount from user to module account
         ; Insert into ad table
         ; Insert into reserverd table
         ; Return Succes
@@ -173,5 +207,6 @@
 
 ;(sell_account "dummyAccount" free.anedak 100.0 "bankAccount")
 ;(sell_account "testAccount" coin 100.0 "bankAccount")
+;(sell_token "dummyAccount" coin 10.0 free.anedak 110.0 "bankAccount")
 
 
