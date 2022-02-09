@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles.css">
+        <title>Over The Kounter</title>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchorme@2.1.2/dist/browser/anchorme.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
+        <script src="./js/login.js"></script>
+        <script src="./js/config.js"></script>
+        <script src="./js/home.js"></script>
+        <script src="./js/add_ad.js"></script>
+    </head>
+    <body onload="loadNewAd()">
+        <div class="content">
+            <h1 class="title">Over The Kounter</h1>
+            <h2>Create a new ad</h2>
+            <div id="newAdPage">
+                <form id="newAdForm">
+                    <div class="div1">
+                        <input type="radio" id="sellAccount" name="fav_language" value="SELLACCOUNT" checked onclick="sellAccountOrToken(false)"/>
+                        <label for="html">Sell Account</label>
+                        <input type="radio" id="sellToken" name="fav_language" value="SELLTOKEN" onclick="sellAccountOrToken(true)"/>
+                        <label for="css">Sell Token</label>                        
+                    
+                        <div id="sellAccountForm">   
+                            <label>Enter your ddd / Address:</label><br>    
+                            <input id="ddds"/>
+                        </div>
+                        <div id="sellTokenForm">
+                            <label>Enter your Accountname / Address:</label><br>    
+                            <input id="accountName"/>
+                        </div>
+                    </div>
+                    <div id="loginButton" class="button">
+                        <button onclick="" type="button">Create Ad</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+    
+</html>

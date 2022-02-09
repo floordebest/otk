@@ -16,28 +16,6 @@ var numberOfChains = 20; // Number of active chains on the blockchain
 
 var creationTime = () => Math.round(new Date().getTime() / 1000) - 15; // Creates a timestamp
 
-// List of all tokens on the blockchain and contract names
-var tokenList = [
-    {
-      "coinName": "Kadena",
-      "coinId": "KDA",
-      "contractIdMain": "coin",
-      "contractIdTest": "coin",
-    },
-    {
-      "coinName": "Anedak",
-      "coinId": "ADK",
-      "contractIdMain": "free.anedak",
-      "contractIdTest": "free.anedak-token",
-    },
-    {
-      "coinName": "Zelcash",
-      "coinId": "FLUX",
-      "contractIdMain": "runonflux.flux",
-      "contractIdTest": "free.flux",
-    },
-  ];
-
 // Returns an URL of the blockchain for testnet or mainnet
 function host(chainID, command) {
     var apiCommand = "";

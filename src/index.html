@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="styles.css">
+        <title>Over The Kounter</title>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/anchorme@2.1.2/dist/browser/anchorme.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/pact-lang-api@4.1.2/pact-lang-api-global.min.js"></script>
+        <script src="./js/login.js"></script>
+        <script src="./js/config.js"></script>
+        <script src="./js/home.js"></script>
+        <script>
+            function deleteMemory() {
+                localStorage.clear()
+                window.location.reload()
+            }
+        </script>
+    </head>
+    <body onload="checkStorage()">
+        <div class="content">
+            <h1 class="title">Over The Kounter</h1>
+            <div id="loginPage">
+                <div class="div1">
+                    <input type="radio" id="ChainWeaver" name="fav_language" value="CHAINWEAVER" checked onclick="loginWithChainWeaver(false)"/>
+                    <label for="html">Login with ChainWeaver</label><br><br>
+                    <input type="radio" id="PrivateKey" name="fav_language" value="PRIVATEKEY" onclick="loginWithChainWeaver(true)"/>
+                    <label for="css">Login with Private Key</label><br><br>                        
+                </div>
+                <form id="loginForm">
+                    <div id="enterAccount">
+                        <label>Enter your Accountname / Address:</label><br>    
+                        <input id="accountName"/>
+                        <br>
+                    </div>
+                    <div id="enterPrivKey">
+                        <label>Enter your privateKey:</label><br>  
+                        <input id="privateKey"/>
+                    </div>
+                    <div id="loginButton" class="button">
+                        <button onclick="confirmOwnership()" type="button">Login</button>
+                    </div>
+                </form>
+            </div>
+            <div id="loggedIn">
+                <div class="showAds">
+
+                </div>
+                <div class="button">
+                    <button onclick="location.href='new_add.html'" type="button">New Ad</button>
+                </div>
+                <div class="button">
+                    <button onclick="0" type="button">My Ads</button>
+                </div>
+                <div class="button">
+                    <button onclick="deleteMemory()" type="button">Logout</button>
+                </div>
+            </div>
+        </div>
+    </body>
+    
+</html>
