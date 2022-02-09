@@ -44,7 +44,7 @@ async function loginWithSecretKey(accountName, privKey) {
     // Try to get the public key from the private key
     try {
         const keyPair = Pact.crypto.restoreKeyPairFromSecretKey(privKey);
-        const command = "(free.otk-test-module.check-ownership \"" + accountName + "\")"
+        const command = "(free.otk-quick-beta.check-ownership \"" + accountName + "\")"
 
         const sig = signWithPact(keyPair, command, 0);
 
@@ -57,7 +57,7 @@ async function loginWithSecretKey(accountName, privKey) {
             const data = await tx.json();
             if (data.result.data) {
                 localStorage.setItem("accountName", accountName)
-                        location.reload();
+                location.reload();
                 //getBalances(accountName)
             } else if (data.result.error.message.includes("row not found")){
                 console.log("Error: Account does not exist on the Kadena Blockchain, make sure your account is active on chain 0")
